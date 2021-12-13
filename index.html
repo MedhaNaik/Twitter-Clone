@@ -1,0 +1,63 @@
+<html>
+
+<head>
+  <title>WebSocket Test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="jquery.min.js"></script>
+  <script src="bootstrap.min.js"></script>
+  <script type="text/javascript" src="app.js"></script>
+</head>
+
+<body>
+  <div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1>Twitter powered by Akka/F#</h1>
+    </div>
+  </div>
+  <br/>
+  <section class="row" id="loginPage">
+    <div class="col-md-12" style="height:5em;">
+      <input type="text" placeholder="username" id="usernameInput"> 
+    </div>
+    <div class = "col-md-6" style="height:5em;">
+      <button id="loginBtn" type="button" class="btn btn-default">Login</button>
+    </div>
+    <div class="col-md-6" style="height:5em;">
+      <button id="registerBtn" type="button" class="btn btn-default">Register</button>
+    </div>
+  </section>
+  <section class="row" id="profilePage">
+    <div class="col-md-12" style="height:5em;">
+      <h2><span id="userHead"> </span><button id="logoutBtn" type="button" class="btn btn-default">Logout</button></h2>
+    </div>
+    <div class="col-md-12" style="height:5em;">
+      <textarea placeholder="Tweet Here" id="tweetTextarea" cols="90" rows="2"></textarea>
+    </div>
+    <div class="col-md-12" style="height:5em;">
+      <textarea type="text" placeholder="mentions" id="mentionsInput" cols="50" rows="1"></textarea>
+    </div>
+    <div class="col-md-12" style="height:5em;">
+      <textarea type="text" placeholder="hashtags" id="hashtagsInput" cols="50" rows="1"></textarea>
+    </div>
+    <div class="col-md-12" style="height:5em;">
+      <button id="tweetBtn" type="button" class="btn btn-default">Tweet</button>
+    </div>
+    <div class="col-md-12" style="height:5em;">
+      <input type="text" placeholder="Subscribe" id="subInput">
+      <button id="subBtn" type="button" class="btn btn-default">Subscribe</button>
+    </div>
+    <div class="col-md-6" style="height:5em;" id="TweetsList"></div>
+    <div class="col-md-12" id="tweetArea">
+      
+    </div>
+  </section>
+</div>
+</body>
+
+</html>
