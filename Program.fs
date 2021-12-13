@@ -211,12 +211,12 @@ module WS =
     let app : WebPart =
         choose [
           path "/websocket" >=> handShake ws
-          GET >=> choose [ path "/" >=> file "index.html"; browseHome ]
-          GET >=> path "/styles.css" >=> file "styles.css" 
-          GET >=> path "/bootstrap.min.css" >=> file "bootstrap.min.css"
-          GET >=> path "/jquery.min.js" >=> file "jquery.min.js" 
-          GET >=> path "/bootstrap.min.js" >=> file "bootstrap.min.js" 
-          GET >=> path "/app.js" >=> file "app.js" 
+          GET >=> choose [ path "/" >=> file "Client/index.html"; browseHome ]
+          GET >=> path "/styles.css" >=> file "Client/styles.css" 
+          GET >=> path "/bootstrap.min.css" >=> file "Client/bootstrap.min.css"
+          GET >=> path "/jquery.min.js" >=> file "Client/jquery.min.js" 
+          GET >=> path "/bootstrap.min.js" >=> file "Client/bootstrap.min.js" 
+          GET >=> path "/app.js" >=> file "Client/app.js" 
           NOT_FOUND "Found no handlers." ]
 
     [<EntryPoint>]
