@@ -1,5 +1,5 @@
 
-  var wsUri = "ws://localhost:8080/websocket";
+var wsUri = "ws://localhost:8080/websocket";
 var websocket;
 var user = "";
 var logged = false;
@@ -36,7 +36,7 @@ function handleMessage(res) {
   else if (res.response == "LoggedOut") {
     user = "";
     logged = false;
-    alert("You are logged out. Thank u for your time");
+    alert("Logged Out!");
     tweets = [];
   } else if (res.response == "Tweet") {
     tweets.push(res.data);
@@ -51,14 +51,12 @@ function handleMessage(res) {
 
   function onOpen(evt)
   {
-    // writeToScreen("CONNECTED");
-    // doSend("WebSocket rocks");
-    console.log("Connected!");
+    console.log("LoggedIn!");
   }
 
   function onClose(evt)
   {
-    alert("Disconnected!");
+    alert("LoggedOut!");
       user = "";
     logged = false;
     tweets = [];
@@ -66,25 +64,20 @@ function handleMessage(res) {
 
   function onMessage(evt)
   {
-    // writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
-    // websocket.close();
     var res = JSON.parse(evt.data);
     handleMessage(res);
   }
 
   function onError(evt)
   {
-    // writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
   }
 
   function doSend(message)
   {
-    // writeToScreen("SENT: " + message); 
     websocket.send(message);
   }
   function doSendJson(message)
   {
-    // writeToScreen("SENT: " + message); 
     var msg = JSON.stringify(message);
     websocket.send(msg);
 }
