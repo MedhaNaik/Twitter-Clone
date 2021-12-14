@@ -44,17 +44,17 @@ function handleMessage(res) {
   else if (res.response == "LoggedOut") {
     user = "";
     logged = false;
-    document.getElementById("usernameInput").value = "";
+    document.getElementById("username").value = "";
     alert("Logged Out!");
     tweets = [];
   } else if (res.response == "Tweet") {
     tweets.push(res.data);
   } else if (res.response == "TweetSent") {
-    document.getElementById("usernameInput").value = "";
-    document.getElementById("tweetTextarea").value = "";
-    document.getElementById("mentionsInput").value = "";
-    document.getElementById("hashtagsInput").value = "";
-    document.getElementById("subInput").value = "";
+    document.getElementById("username").value = "";
+    document.getElementById("tweet").value = "";
+    document.getElementById("mentions").value = "";
+    document.getElementById("hashtags").value = "";
+    document.getElementById("subscribeText").value = "";
   }
   else if (res.response == "ERROR") {
     alert(res.data);
@@ -118,8 +118,9 @@ function checkLogin() {
     init();
     setInterval(checkLogin, 2000);
 
-    $("#loginBtn").click(function () {
-      var ustext = document.getElementById("usernameInput").value;
+    $("#login").click(function () {
+      var ustext = document.getElementById("username").value;
+      var pass = document.getElementById("password").value;
       if (ustext != "" && !logged) {
         var jmsg = {
           request: "Login",
@@ -132,8 +133,9 @@ function checkLogin() {
       }
     });
 
-    $("#registerBtn").click(function () {
-      var ustext = document.getElementById("usernameInput").value;
+    $("#register").click(function () {
+      var ustext = document.getElementById("username").value;
+      var pass = document.getElementById("password").value;
       if (ustext != "" && !logged) {
         var jmsg = {
           request: "Register",
@@ -146,7 +148,7 @@ function checkLogin() {
       }
     });
 
-    $("#logoutBtn").click(function () {
+    $("#logoutButton").click(function () {
       if (logged && user != "") {
         var jmsg = {
           request: "Logout",
@@ -158,14 +160,14 @@ function checkLogin() {
         doSendJson(jmsg);
       }
     });
-    $("#tweetBtn").click(function () {
-      var ustext = document.getElementById("tweetTextarea").value;
-      var mtext = document.getElementById("mentionsInput").value;
+    $("#tweetButton").click(function () {
+      var ustext = document.getElementById("tweet").value;
+      var mtext = document.getElementById("mentions").value;
       var ms = mtext.split(" ");
       ms.forEach(m => {
         ustext += " @" + m; 
       });
-      var htext = document.getElementById("hashtagsInput").value;
+      var htext = document.getElementById("hashtags").value;
       var hs = htext.split(" ");
       hs.forEach(m => {
         ustext += " #" + m; 
@@ -182,8 +184,8 @@ function checkLogin() {
         doSendJson(jmsg);
       }
     });
-    $("#subBtn").click(function () {
-      var ustext = document.getElementById("subInput").value;
+    $("#subscribeButton").click(function () {
+      var ustext = document.getElementById("subscribeText").value;
       if (ustext != "" && logged) {
         if (ustext.charAt(0) == "#") {
           var jmsg = {

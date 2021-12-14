@@ -23,11 +23,16 @@
   <br/>
   <section class="row" id="loginPage">
     <div style="height:5em;" class="center">
-      <input type="text" placeholder="User Name" id="usernameInput" style="height:2.5em"> 
+      <input type="text" placeholder="User Name" id="username" style="height:2.2em"> 
       &nbsp;
-      <button id="loginBtn" type="button" class="btn btn-default">Login</button>
+      <input type="password" placeholder="password" id="password" style="height:2.2em"> 
+      <br/>
+      <br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <button id="login" type="button" class="btn btn-default">Login</button>
       &nbsp;
-      <button id="registerBtn" type="button" class="btn btn-default">Register</button>
+      &nbsp;
+      <button id="register" type="button" class="btn btn-default">Register</button>
     </div>
   </section>
 
@@ -36,19 +41,19 @@
   <section class="row" id="profilePage">
     
     <div class="center2" style="height:5em;">
-      <textarea placeholder="Tweet" id="tweetTextarea" cols="50" rows="2"></textarea><br/><br/>
-      <textarea type="text" placeholder="Mentions" id="mentionsInput" cols="50" rows="1"></textarea><br/><br/>
-      <textarea type="text" placeholder="Hashtags" id="hashtagsInput" cols="50" rows="1"></textarea><br/><br/>
-      <button id="tweetBtn" type="button" class="btn btn-default" style="background-color: rgb(29, 161, 242);">Tweet</button><br/><br/>
+      <textarea placeholder="Tweet" id="tweet" cols="50" rows="2"></textarea><br/><br/>
+      <textarea type="text" placeholder="Mentions" id="mentions" cols="50" rows="1"></textarea><br/><br/>
+      <textarea type="text" placeholder="hashtags" id="hashtags" cols="50" rows="1"></textarea><br/><br/>
+      <button id="tweetButton" type="button" class="btn btn-default" style="background-color: rgb(29, 161, 242);">Tweet</button><br/><br/>
 
       <h5>Subscribe Here!!</h5>
-      <input type="text" placeholder="Subscribe" id="subInput" style="height:2.5em;">&nbsp;
-      <button id="subBtn" type="button" class="btn btn-default">Subscribe</button><br/>
+      <input type="text" placeholder="Subscribe" id="subscribeText" style="height:2.5em;">&nbsp;
+      <button id="subscribeButton" type="button" class="btn btn-default">Subscribe</button><br/>
       <br/>
 
 
-      <h2><span id="userHead"> </span><button id="logoutBtn" type="button" class="btn btn-default">Logout</button></h2>
-    <div class="col-md-6" style="height:5em;" id="TweetsList"></div>
+      <h2><span id="userHead"> </span><button id="logoutButton" type="button" class="btn btn-default">Logout</button></h2>
+    <div class="col-md-6" style="height:5em;" id="TweetFeed"></div>
     <div class="col-md-12" id="tweetArea">
     
     </div>
