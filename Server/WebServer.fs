@@ -134,7 +134,7 @@ module WS =
                     | "Login" ->
                         if users.ContainsKey json.username then
                             let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                            let req:Async<_> = node <? LOGIN_REQUEST(json.username, "")
+                            let req:Async<_> = node <? LOGIN_REQUEST(json.username, json.password)
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
@@ -152,7 +152,7 @@ module WS =
                         else
                             let name = "user-" + json.username 
                             let node = spawn serversystem name <| userActor engineRef webSocket
-                            let req:Async<_> = node <? REGISTER_REQUEST(json.username, "")
+                            let req:Async<_> = node <? REGISTER_REQUEST(json.username, json.password)
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)

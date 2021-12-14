@@ -24,12 +24,12 @@ function handleMessage(res) {
   console.log(res);
   if (res.response == "UserRegistered" || res.response == "UserExists") {
     user = res.data;
-    logged = true;
     tweets = [];
-
+    var pass = document.getElementById("password").value;
     var jmsg = {
       request: "Login",
       username: user,
+      password: pass,
       tweet: "",
       mentions: [],
       hashtags: []
@@ -45,6 +45,7 @@ function handleMessage(res) {
     user = "";
     logged = false;
     document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
     alert("Logged Out!");
     tweets = [];
   } else if (res.response == "Tweet") {
@@ -125,6 +126,7 @@ function checkLogin() {
         var jmsg = {
           request: "Login",
           username: ustext,
+          password: pass,
           tweet: "",
           mentions: [],
           hashtags: []
@@ -134,12 +136,14 @@ function checkLogin() {
     });
 
     $("#register").click(function () {
+      console.log("reg clicked")
       var ustext = document.getElementById("username").value;
       var pass = document.getElementById("password").value;
       if (ustext != "" && !logged) {
         var jmsg = {
           request: "Register",
           username: ustext,
+          password: pass,
           tweet: null,
           mentions: null,
           hashtags: null
