@@ -2,8 +2,10 @@
 var wsUri = "ws://localhost:8080/websocket";
 var websocket;
 var user = "";
+
 var logged = false;
 var tweets = [];
+var results = [];
 
   function init()
   {
@@ -39,7 +41,6 @@ function handleMessage(res) {
   else if (res.response == "UserLogged") {
     user = res.data;
     logged = true;
-    alert("Logged in as " + user);
   }
   else if (res.response == "LoggedOut") {
     user = "";
@@ -59,6 +60,19 @@ function handleMessage(res) {
   }
   else if (res.response == "ERROR") {
     alert(res.data);
+
+
+    
+  }
+  else if (res.response == "SearchResult")
+  {
+    document.getElementById("searchResult").value = "";
+    $("#searchResult").empty();
+    
+    res.data.forEach(element => {
+      $("#searchResult").append("<p>" + element + "</p>");
+    });
+    
   }
 }
 
@@ -108,6 +122,7 @@ function checkLogin() {
       $("#tweetArea").append("<p>" + element + "</p>");
     });
 
+
   } else {
     $("#loginPage").removeClass("hide");
     $("#profilePage").addClass("hide");
@@ -151,6 +166,24 @@ function checkLogin() {
         doSendJson(jmsg);
       }
     });
+
+    $("#searchButton").click(function () {
+      console.log("reg clicked")
+      var search = document.getElementById("search").value;
+      if (ustext != "" && !logged) {
+        var jmsg = {
+          request: "Search",
+          username: user,
+          search: search,
+          tweet: null,
+          mentions: null,
+          hashtags: null
+        };
+        doSendJson(jmsg);
+      }
+    });
+
+
 
     $("#logoutButton").click(function () {
       if (logged && user != "") {
