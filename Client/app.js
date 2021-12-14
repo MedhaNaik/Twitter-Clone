@@ -25,8 +25,16 @@ function handleMessage(res) {
   if (res.response == "UserRegistered" || res.response == "UserExists") {
     user = res.data;
     logged = true;
-    alert("Logged in as " + user);
     tweets = [];
+
+    var jmsg = {
+      request: "Login",
+      username: user,
+      tweet: "",
+      mentions: [],
+      hashtags: []
+    };
+    doSendJson(jmsg);
   }
   else if (res.response == "UserLogged") {
     user = res.data;
@@ -36,6 +44,7 @@ function handleMessage(res) {
   else if (res.response == "LoggedOut") {
     user = "";
     logged = false;
+    document.getElementById("usernameInput").value = "";
     alert("Logged Out!");
     tweets = [];
   } else if (res.response == "Tweet") {
@@ -46,6 +55,9 @@ function handleMessage(res) {
     document.getElementById("mentionsInput").value = "";
     document.getElementById("hashtagsInput").value = "";
     document.getElementById("subInput").value = "";
+  }
+  else if (res.response == "ERROR") {
+    alert(res.data);
   }
 }
 
@@ -173,14 +185,30 @@ function checkLogin() {
     $("#subBtn").click(function () {
       var ustext = document.getElementById("subInput").value;
       if (ustext != "" && logged) {
-        var jmsg = {
-          request: "Subscribe",
-          username: ustext,
-          tweet: "",
-          mentions: [],
-          hashtags: []
-        };
-        doSendJson(jmsg);
+        if (ustext.charAt(0) == "#") {
+          var jmsg = {
+            request: "Subscribe",
+            username: user,
+            tweet: "",
+            subtype: "hashtag",
+            subTo: ustext.substring(1),
+            mentions: [],
+            hashtags: []
+          };
+          doSendJson(jmsg);
+        } else {
+          var jmsg = {
+            request: "Subscribe",
+            username: user,
+            tweet: "",
+            subtype: "user",
+            subTo: ustext,
+            mentions: [],
+            hashtags: []
+          };
+          doSendJson(jmsg);
+        }
+       
       }
     });
 
