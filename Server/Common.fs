@@ -68,13 +68,13 @@ module Common =
         | SEND_LOGGEDOUT of Akka.Actor.IActorRef 
         | SEND_ERROR of Akka.Actor.IActorRef*string
         | SEND_FEED of string*tweet*feedType
-        | SEND_RESULT of string*query
+        | SEND_RESULT of Akka.Actor.IActorRef*query
 
 
     // messages to tweet actor
     type FeedMessage = 
         | FEED of string*tweet 
-        | NEWQUERY of string*query
+        | NEWQUERY of string*query*Akka.Actor.IActorRef
         | NEWSUB of string*subscription
 
     type ClientReq =    
@@ -85,6 +85,7 @@ module Common =
         | HASHTAG_SUB_REQUEST of suser: string * sHashtag: string
         | TWEET_REQUEST of cuser: string * tweet: string * hashtags: Set<string> * mentions: Set<string>
         | REFRESH_REQUEST of username:string
+        | SEARCH_REQUEST of username:string * queryType:string * query:string
         | NEW_FEED of feedType*tweet
     
 
@@ -110,6 +111,8 @@ module Common =
         subtype: string;
         subTo: string;
         tweet:string;
+        searchType:string;
+        search:string;
         mentions:Set<string>;
         hashtags: Set<string>
     } 

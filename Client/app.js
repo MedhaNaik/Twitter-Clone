@@ -68,8 +68,7 @@ function handleMessage(res) {
   {
     document.getElementById("searchResult").value = "";
     $("#searchResult").empty();
-    
-    res.data.forEach(element => {
+    res.data.split("\n").forEach(element => {
       $("#searchResult").append("<p>" + element + "</p>");
     });
     
@@ -168,16 +167,19 @@ function checkLogin() {
     });
 
     $("#searchButton").click(function () {
-      console.log("reg clicked")
       var search = document.getElementById("search").value;
-      if (ustext != "" && !logged) {
+      if (search != "" && logged) {
+        var searchType = "user"
+        if(search.charAt(0) == "#") {
+          searchType = "hashtag"
+          search = search.substring(1);
+        }
+        
         var jmsg = {
           request: "Search",
           username: user,
           search: search,
-          tweet: null,
-          mentions: null,
-          hashtags: null
+          searchType: searchType
         };
         doSendJson(jmsg);
       }

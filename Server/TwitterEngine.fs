@@ -45,9 +45,8 @@ module TwitterEngine =
                 let userActor = select ("akka.tcp://Server@localhost:9002/user/user-" + userID) serversystem
                 userActor <! NEW_FEED(feedType, newTweet)
                 //printfn "tweet for %s : %s" userID newTweet.body
-            | SEND_RESULT(userID, query) ->
-                //printfn "query: %s " query.queryString
-                let userActor = select ("akka.tcp://Server@localhost:9002/user/user-" + userID) serversystem
+            | SEND_RESULT(userActor, query) ->
+                printfn "query: %s " query.queryString
                 userActor <! QUERY_RESULT(query)
             | _ -> printfn "Server Received Wrong message"
             return! loop()
@@ -61,7 +60,7 @@ module TwitterEngine =
     let subscriber_manager (mailbox:Actor<_>) =
         let responseActor = select ("akka.tcp://Server@localhost:9002/user/response") serversystem
         // user ids and tweets
-        let mutable userTweetMap: Map<string, Set<string>> = Map.empty
+        let mutable userTweetMap: Map<string,  Set<string>> = Map.empty
         // user id and subsciber ids
         let mutable userSubscriberMap: Map<string, Set<string>> = Map.empty
 
@@ -70,9 +69,11 @@ module TwitterEngine =
             match message with
             | FEED(userID, newTweet) ->
                 let tweetID = newTweet.guID
-                // add tweet to the user tweet map
+                
+                // add tweet to the user tweet mapß
                 if userTweetMap.ContainsKey(userID) then
                     userTweetMap <- userTweetMap.Add(userID,  userTweetMap.[userID].Add(tweetID))
+                   
                 else
                     userTweetMap <- Map.add userID Set.empty userTweetMap
                     userTweetMap <- userTweetMap.Add(userID,  userTweetMap.[userID].Add(tweetID))
@@ -89,12 +90,12 @@ module TwitterEngine =
                     userSubscriberMap <- Map.add user Set.empty userSubscriberMap
                     userSubscriberMap <- userSubscriberMap.Add(user, userSubscriberMap.[user].Add(userID))
 
-            | NEWQUERY(userID, query) ->
+            | NEWQUERY(userID, query, sender) ->
                 let result = new List<tweet>()
                 if userTweetMap.ContainsKey query.queryString then
                     Set.map (fun tweetID -> result.Add(tweetMap.[tweetID])) userTweetMap.[query.queryString] |> ignore
                     query.result <- result
-                    responseActor <! SEND_RESULT(userID, query)
+                    responseActor <! SEND_RESULT(sender, query)
             | _ -> printfn "Server Received Wrong message"
             return! loop()
         }
@@ -122,12 +123,12 @@ module TwitterEngine =
 
                     if connected.Contains userID then
                         responseActor <! SEND_FEED(userID, newTweet, MENTIONS_FEED)
-            | NEWQUERY(userID, query) ->
+            | NEWQUERY(userID, query, sender) ->
                 let result = new List<tweet>()
                 if mentionsMap.ContainsKey query.queryString then
                     Set.map (fun tweetID -> result.Add(tweetMap.[tweetID])) mentionsMap.[query.queryString] |> ignore
                     query.result <- result
-                    responseActor <! SEND_RESULT(userID, query)
+                    responseActor <! SEND_RESULT(sender, query)
             | _ -> printfn "Server Received Wrong message"
             return! loop()
         }
@@ -166,13 +167,13 @@ module TwitterEngine =
                         hashtagSubscriberMap <- Map.add hashtag Set.empty hashtagSubscriberMap
                         hashtagSubscriberMap <- hashtagSubscriberMap.Add(hashtag, hashtagSubscriberMap.[hashtag].Add(userID))
             
-            | NEWQUERY(userID, query) ->
+            | NEWQUERY(userID, query, sender) ->
                 let result = new List<tweet>()
                 if hashtagMap.ContainsKey query.queryString then
                     Set.map (fun tweetID -> result.Add(tweetMap.[tweetID])) hashtagMap.[query.queryString] |> ignore
                     query.result <- result
             
-                    responseActor <! SEND_RESULT(userID, query)
+                    responseActor <! SEND_RESULT(sender, query)
             | _ -> printfn "Server Received Wrong message"
             return! loop()
         }
@@ -234,12 +235,12 @@ module TwitterEngine =
                 match newQuery.queryType with
                 | MENTIONS ->
                     // return all tweets with mentions of user
-                    mentionsActor <! NEWQUERY(userID, newQuery)
+                    mentionsActor <! NEWQUERY(userID, newQuery, mailbox.Sender())
                 | HASHTAG ->
-                    hashtagsActor <! NEWQUERY(userID, newQuery)
+                    hashtagsActor <! NEWQUERY(userID, newQuery, mailbox.Sender())
                     // return all tweets with given hashtag
                 | SUBSCRIPTION ->
-                    subscribersActor <! NEWQUERY(userID, newQuery)
+                    subscribersActor <! NEWQUERY(userID, newQuery, mailbox.Sender())
                     // return all tweets of a subscribed user
             | SUBSCRIBE(userID, newSub) ->
                 match newSub.subType with

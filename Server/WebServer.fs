@@ -72,7 +72,7 @@ module WS =
                     | _ -> printfn "invalid message: %A" message
                 | TWEET_REQUEST(u,tw,h,m) ->
                     let mutable t:tweet = new tweet() 
-                    t.guID <- Guid.NewGuid |> string
+                    t.guID <- DateTime.Now.ToString() |> string
                     t.body <- sprintf "%s : %s" (DateTime.Now.ToString()) tw
                     t.hashtags <- h
                     t.mentions <- m
@@ -108,6 +108,25 @@ module WS =
                     engineRef <! SUBSCRIBE(userID, s)
                     let ress = [{response = "UserSubscribed" ; data = ""}]
                     mailbox.Sender() <! ress
+                | SEARCH_REQUEST(userID, queryType, query) ->
+                    let mutable q:query = new query()
+                    q.queryString <- query
+                    match queryType with
+                    | "user" ->
+                        q.queryType <- SUBSCRIPTION
+                    | "hashtag" ->
+                        q.queryType <- HASHTAG
+                    | _ -> printfn "invalid query type"
+                    
+                    let req:Async<_> = engineRef <? QUERY(userID, q)
+                    let res = Async.RunSynchronously req
+                    match res with
+                    | QUERY_RESULT(query) -> 
+                        let mutable result = ""
+                        for t in query.result do
+                            result <- result + t.senderID + " " + t.body + "\n"
+                        let ress = [{response = "SearchResult";data = result}]
+                        mailbox.Sender() <! ress
                 | _ -> printfn "invalid message: %A" message
                 return! loop ()
             }
@@ -198,8 +217,16 @@ module WS =
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
                                 let bres = jres |> System.Text.Encoding.ASCII.GetBytes |> ByteSegment
-                                do! webSocket.send Text bres true
+                                do! webSocket.send Text bres true   
                         | _ -> printfn "Unknown request"
+                    | "Search" ->
+                            let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
+                            let req:Async<_> = node <? SEARCH_REQUEST(json.username, json.searchType, json.search)
+                            let res = Async.RunSynchronously req
+                            for r in res do
+                                let jres = JsonConvert.SerializeObject(r)
+                                let bres = jres |> System.Text.Encoding.ASCII.GetBytes |> ByteSegment
+                                do! webSocket.send Text bres true
                     | _ -> printfn "Unknown request"
 
                 | (Close, _, _) ->
