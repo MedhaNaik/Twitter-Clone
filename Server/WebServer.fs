@@ -28,13 +28,13 @@ open TwitterEngine
 
 module WS =
 
-    let clientNode engineRef (wsoc:WebSocket) (mailbox:Actor<_>) = 
+    let userActor engineRef (wsoc:WebSocket) (mailbox:Actor<_>) = 
         let mutable feed = ""
         let rec loop () =
             actor{
                 let! message = mailbox.Receive()
                 match message with
-                | CLoginUser(userID, password) ->
+                | LOGIN_REQUEST(userID, password) ->
                     let req:Async<_> = engineRef <? LOGIN(userID , password)
                     let res = Async.RunSynchronously req
                     match res with
@@ -46,7 +46,7 @@ module WS =
                         let ress = [{response = "ERROR" ; data = errorMsg}]
                         mailbox.Sender() <! ress
                     | _ -> printfn "message received: %A" message
-                | CRegisterUser(userID, password) ->
+                | REGISTER_REQUEST(userID, password) ->
                     let req:Async<_> = engineRef <? REGISTER(userID, password)
                     printfn "response sent "
                     let res = Async.RunSynchronously req
@@ -59,7 +59,7 @@ module WS =
                         let ress = [{response = "ERROR" ; data = errorMsg}]
                         mailbox.Sender() <! ress
                     | _ -> printfn "invalid message: %A" message
-                | CLogoutUser(userID) ->
+                | LOGOUT_REQUEST(userID) ->
                     let req:Async<_> = engineRef <? LOGOUT(userID)
                     let res = Async.RunSynchronously req
                     match res with
@@ -70,7 +70,7 @@ module WS =
                         let ress = [{response = "ERROR" ; data = errorMsg}]
                         mailbox.Sender() <! ress
                     | _ -> printfn "invalid message: %A" message
-                | CTweetRequest(u,tw,h,m) ->
+                | TWEET_REQUEST(u,tw,h,m) ->
                     let mutable t:tweet = new tweet() 
                     t.guID <- Guid.NewGuid |> string
                     t.body <- sprintf "%s : %s" (DateTime.Now.ToString()) tw
@@ -90,18 +90,18 @@ module WS =
                     | HASHTAG_FEED ->
                         s <- s + " New tweet from hashtag " + tweet.hashtags.ToString() + "\n\t" + tweet.body  + "\n"
                     feed <- feed + s
-                | CRefresh(userID) ->
+                | REFRESH_REQUEST(userID) ->
                     let ress = [{response = "Tweet" ; data = feed}]
                     mailbox.Sender() <! ress
                     feed <- ""
-                | CSubscribeUser(userID, suser) ->
+                | USERSUB_REQUEST(userID, suser) ->
                     let mutable s:subscription = new subscription()
                     s.subTo <- suser
                     s.subType <- USER_SUB
                     engineRef <! SUBSCRIBE(userID, s)
                     let ress = [{response = "UserSubscribed" ; data = ""}]
                     mailbox.Sender() <! ress
-                | CSubscribeHashtag(userID, sHashtag) ->
+                | HASHTAG_SUB_REQUEST(userID, sHashtag) ->
                     let mutable s:subscription = new subscription()
                     s.subTo <- sHashtag
                     s.subType <- HASHTAG_SUB
@@ -114,6 +114,9 @@ module WS =
         loop()
 
 
+
+
+  
 
     let ws (webSocket : WebSocket) (context: HttpContext) =
         
@@ -131,7 +134,7 @@ module WS =
                     | "Login" ->
                         if users.ContainsKey json.username then
                             let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                            let req:Async<_> = node <? CLoginUser(json.username, "")
+                            let req:Async<_> = node <? LOGIN_REQUEST(json.username, "")
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
@@ -140,7 +143,7 @@ module WS =
                     | "Register" ->
                         if users.ContainsKey  json.username then
                             let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                            let req:Async<_> = node <? CRegisterUser(json.username, "")
+                            let req:Async<_> = node <? REGISTER_REQUEST(json.username, json.password)
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
@@ -148,8 +151,8 @@ module WS =
                                 do! webSocket.send Text bres true
                         else
                             let name = "user-" + json.username 
-                            let node = spawn serversystem name <| clientNode engineRef webSocket
-                            let req:Async<_> = node <? CRegisterUser(json.username, "")
+                            let node = spawn serversystem name <| userActor engineRef webSocket
+                            let req:Async<_> = node <? REGISTER_REQUEST(json.username, "")
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
@@ -157,7 +160,7 @@ module WS =
                                 do! webSocket.send Text bres true
                     | "Logout" ->
                         let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                        let req:Async<_> = node <? CLogoutUser(json.username)
+                        let req:Async<_> = node <? LOGOUT_REQUEST(json.username)
                         let res = Async.RunSynchronously req
                         for r in res do
                             let jres = JsonConvert.SerializeObject(r)
@@ -165,7 +168,7 @@ module WS =
                             do! webSocket.send Text bres true
                     | "Tweet" ->
                         let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                        let req:Async<_> = node <? CTweetRequest(json.username,json.tweet,json.hashtags ,json.mentions)
+                        let req:Async<_> = node <? TWEET_REQUEST(json.username,json.tweet,json.hashtags ,json.mentions)
                         let res = Async.RunSynchronously req
                         for r in res do
                             let jres = JsonConvert.SerializeObject(r)
@@ -173,7 +176,7 @@ module WS =
                             do! webSocket.send Text bres true
                     | "Refresh" ->
                         let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
-                        let req:Async<_> = node <? CRefresh(json.username)
+                        let req:Async<_> = node <? REFRESH_REQUEST(json.username)
                         let res = Async.RunSynchronously req
                         for r in res do
                             let jres = JsonConvert.SerializeObject(r)
@@ -183,14 +186,14 @@ module WS =
                         let node = select ("akka.tcp://Server@localhost:9002/user/user-" + json.username) serversystem
                         match json.subtype with
                         | "user" ->
-                            let req:Async<_> = node <? CSubscribeUser(json.username, json.subTo)
+                            let req:Async<_> = node <? USERSUB_REQUEST(json.username, json.subTo)
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
                                 let bres = jres |> System.Text.Encoding.ASCII.GetBytes |> ByteSegment
                                 do! webSocket.send Text bres true
                         | "hashtag" ->
-                            let req:Async<_> = node <? CSubscribeHashtag(json.username, json.subTo)
+                            let req:Async<_> = node <? HASHTAG_SUB_REQUEST(json.username, json.subTo)
                             let res = Async.RunSynchronously req
                             for r in res do
                                 let jres = JsonConvert.SerializeObject(r)
